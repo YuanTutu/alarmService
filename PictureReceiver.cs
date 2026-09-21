@@ -1,12 +1,14 @@
 // PictureReceiver.exe - 报警服务器模拟器 (单文件界面版)
 //
 // 作者:     yuanbo6
-// 开发时间: 2026-09-10
-// 版本:     v2.2
+// 开发时间: 2026-09-21
+// 版本:     v2.3
 //   v1.0  控制台版: http/https 接收摄像头抓拍推送, multipart 内存拆包落盘
 //   v2.0  界面版重构: WinForms 界面配置, 内嵌 https 证书, 单 exe 交付
 //   v2.1  标题改为"报警服务器模拟器", 窗口横向放宽, 按钮文字完整显示
 //   v2.2  按钮高度与保存目录框运行时对齐 (兼容高 DPI 缩放)
+//   v2.3  未知 multipart 部件按真实内容落盘: 图片按魔数, XML/JSON 文本按
+//         内容嗅探, 不再统一 .bin (如 AlarmIn.xml 报警事件, AIOP 轮巡抓图元数据)
 //
 // 功能:
 //   1. 图形界面配置协议(http/https)/监听IP/端口/保存目录, 点"应用并重启监听"生效
@@ -40,8 +42,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("yuanbo6")]
 [assembly: System.Reflection.AssemblyProduct("报警服务器模拟器")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright yuanbo6 2026")]
-[assembly: System.Reflection.AssemblyVersion("2.2.0.0")]
-[assembly: System.Reflection.AssemblyFileVersion("2.2.0.0")]
+[assembly: System.Reflection.AssemblyVersion("2.3.0.0")]
+[assembly: System.Reflection.AssemblyFileVersion("2.3.0.0")]
 
 namespace PictureReceiver
 {
@@ -49,9 +51,9 @@ namespace PictureReceiver
 
     static class AppInfo
     {
-        public const string Version = "v2.2";
+        public const string Version = "v2.3";
         public const string Author = "yuanbo6";
-        public const string BuildDate = "2026-09-10";
+        public const string BuildDate = "2026-09-21";
     }
 
     #endregion
@@ -447,7 +449,8 @@ namespace PictureReceiver
                     if (p.Name == "faceCapture") { prefix = "meta"; ext = ".json"; }
                     else if (p.Name == "faceImage") { prefix = "face"; ext = GuessImgExt(p.Body); }
                     else if (p.Name == "backgroundImage") { prefix = "bg"; ext = GuessImgExt(p.Body); }
-                    else { prefix = string.IsNullOrEmpty(p.Name) ? "part" : p.Name; ext = GuessImgExt(p.Body); }
+                    else if (p.Name == "AIOP_Polling_Snap") { prefix = "meta"; ext = ".json"; } // 轮巡抓图事件元数据, 与同推送的图片配对
+                    else { prefix = PartPrefix(p.Name); ext = GuessPartExt(p.Body, p.ContentType); }
 
                     string outPath = Path.Combine(saveDir, baseName + "_" + prefix + ext);
                     File.WriteAllBytes(outPath, p.Body);
@@ -485,12 +488,61 @@ namespace PictureReceiver
         {
             string byMagic = GuessImgExt(body);
             if (byMagic != ".bin") return byMagic;
+            string sniff = SniffText(body);
+            if (sniff != null) return sniff;
             contentType = (contentType ?? "").ToLowerInvariant();
             if (contentType.Contains("json")) return ".json";
+            if (contentType.Contains("xml")) return ".xml";
             if (contentType.Contains("text/")) return ".txt";
             if (contentType.Contains("jpeg") || contentType.Contains("jpg")) return ".jpg";
             if (contentType.Contains("png")) return ".png";
             return ".bin";
+        }
+
+        // 未知部件名 -> 文件名前缀: 替换非法字符, 去掉与格式重复的扩展名 ("AlarmIn.xml" -> "AlarmIn")
+        static string PartPrefix(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return "part";
+            foreach (char c in Path.GetInvalidFileNameChars()) name = name.Replace(c, '_');
+            string lower = name.ToLowerInvariant();
+            foreach (string e in KnownExts)
+            {
+                if (lower.EndsWith(e) && name.Length > e.Length)
+                {
+                    name = name.Substring(0, name.Length - e.Length);
+                    break;
+                }
+            }
+            return name;
+        }
+
+        // 未知部件 -> 扩展名: 图片魔数 -> 文本嗅探 -> 部件 Content-Type 兜底
+        static string GuessPartExt(byte[] body, string contentType)
+        {
+            string byMagic = GuessImgExt(body);
+            if (byMagic != ".bin") return byMagic;
+            string sniff = SniffText(body);
+            if (sniff != null) return sniff;
+            string ct = (contentType ?? "").ToLowerInvariant();
+            if (ct.Contains("json")) return ".json";
+            if (ct.Contains("xml")) return ".xml";
+            if (ct.Contains("text/")) return ".txt";
+            return ".bin";
+        }
+
+        static readonly string[] KnownExts = { ".xml", ".json", ".txt", ".jpg", ".jpeg", ".png", ".bmp" };
+
+        // 文本内容嗅探: 跳过 BOM/空白后看首字符, '{'/'[' 为 JSON, '<' 为 XML
+        static string SniffText(byte[] body)
+        {
+            int i = 0;
+            if (body.Length >= 3 && body[0] == 0xEF && body[1] == 0xBB && body[2] == 0xBF) i = 3; // UTF-8 BOM
+            while (i < body.Length && (body[i] == (byte)' ' || body[i] == (byte)'\t' || body[i] == (byte)'\r' || body[i] == (byte)'\n')) i++;
+            if (i >= body.Length) return null;
+            byte c = body[i];
+            if (c == (byte)'{' || c == (byte)'[') return ".json";
+            if (c == (byte)'<') return ".xml";
+            return null;
         }
 
         static string ReadHeaders(Stream s)

@@ -8,3 +8,6 @@ config.txt
 
 # 真实设备抓包样本 (含真实人脸图像与设备信息, 不上传)
 recv_*.bin
+
+# 本地解压运行的 release 目录
+PictureReceiver-v*-win/

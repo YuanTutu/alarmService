@@ -1,7 +1,7 @@
 # PictureReceiver / 报警服务器模拟器 - 摄像头抓拍数据接收器
 
-> 当前版本 **v2.2** · 作者 yuanbo6 · 开发时间 2026-09-10
-> 版本历史：v1.0 控制台版 → v2.0 WinForms 界面版（内嵌 https 证书）→ v2.1 标题与窗口布局调整 → v2.2 按钮高 DPI 等高对齐
+> 当前版本 **v2.3** · 作者 yuanbo6 · 开发时间 2026-09-21
+> 版本历史：v1.0 控制台版 → v2.0 WinForms 界面版（内嵌 https 证书）→ v2.1 标题与窗口布局调整 → v2.2 按钮高 DPI 等高对齐 → v2.3 未知部件按真实格式落盘
 
 ## 一、开发目的
 
@@ -64,8 +64,9 @@ powershell Compress-Archive -Path deliver/PictureReceiver.exe,deliver/README.md 
 ## 六、接收与保存规则
 
 - 只处理 `/test` 路径，其他返回 404；接口约定 POST，数据在请求体
-- multipart 抓拍推送在内存直接拆包：`faceCapture → *_meta.json`、`faceImage → *_face.jpg`、`backgroundImage → *_bg.jpg`
-- 非 multipart 请求体按时间戳原样保存，扩展名按 Content-Type 和文件头推断
+- multipart 抓包推送在内存直接拆包：`faceCapture → *_meta.json`、`faceImage → *_face.jpg`、`backgroundImage → *_bg.jpg`
+- **未知部件按真实内容落盘（v2.3）**：图片按文件头魔数存 `.jpg/.png/.bmp`；JSON/XML 文本按内容嗅探存 `.json/.xml`（如 IO 报警事件 `AlarmIn.xml`、AI 轮巡抓图元数据 `AIOP_Polling_Snap → *_meta.json`），部件名自带的扩展名不再重复叠加，不再产生 `.bin`
+- 非 multipart 请求体按时间戳原样保存，扩展名同样按文件头与内容嗅探推断
 
 ## 七、测试方法
 
