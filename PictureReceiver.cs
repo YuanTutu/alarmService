@@ -2,7 +2,7 @@
 //
 // 作者:     yuanbo6
 // 开发时间: 2026-09-21
-// 版本:     v2.4
+// 版本:     v2.4.1
 //   v1.0  控制台版: http/https 接收摄像头抓拍推送, multipart 内存拆包落盘
 //   v2.0  界面版重构: WinForms 界面配置, 内嵌 https 证书, 单 exe 交付
 //   v2.1  标题改为"报警服务器模拟器", 窗口横向放宽, 按钮文字完整显示
@@ -10,6 +10,7 @@
 //   v2.3  未知 multipart 部件按真实内容落盘: 图片按魔数, XML/JSON 文本按
 //         内容嗅探, 不再统一 .bin (如 AlarmIn.xml 报警事件, AIOP 轮巡抓图元数据)
 //   v2.4  界面常显提示"摄像头内 URL 必须填写 /test" (现场曾因漏填路径导致 404)
+//   v2.4.1 按现场反馈完善提示语: "摄像头内URL必须填写/test 完整URL为: http://..."
 //
 // 功能:
 //   1. 图形界面配置协议(http/https)/监听IP/端口/保存目录, 点"应用并重启监听"生效
@@ -43,8 +44,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("yuanbo6")]
 [assembly: System.Reflection.AssemblyProduct("报警服务器模拟器")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright yuanbo6 2026")]
-[assembly: System.Reflection.AssemblyVersion("2.4.0.0")]
-[assembly: System.Reflection.AssemblyFileVersion("2.4.0.0")]
+[assembly: System.Reflection.AssemblyVersion("2.4.1.0")]
+[assembly: System.Reflection.AssemblyFileVersion("2.4.1.0")]
 
 namespace PictureReceiver
 {
@@ -52,7 +53,7 @@ namespace PictureReceiver
 
     static class AppInfo
     {
-        public const string Version = "v2.4";
+        public const string Version = "v2.4.1";
         public const string Author = "yuanbo6";
         public const string BuildDate = "2026-09-21";
     }
@@ -752,7 +753,7 @@ namespace PictureReceiver
             lblTestHint.AutoSize = true;
             lblTestHint.Font = new Font("Microsoft YaHei UI", 9F, FontStyle.Bold);
             lblTestHint.ForeColor = Color.FromArgb(180, 60, 0);
-            lblTestHint.Text = "摄像头内 URL 必须填写 /test：http://本机IP:端口/test";
+            lblTestHint.Text = "摄像头内URL必须填写/test  完整URL为：http://本机IP:端口/test";
 
             lblHttpsHint = new Label();
             lblHttpsHint.Location = new Point(18, 268);
