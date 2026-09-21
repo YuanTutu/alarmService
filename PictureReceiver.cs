@@ -2,13 +2,14 @@
 //
 // 作者:     yuanbo6
 // 开发时间: 2026-09-21
-// 版本:     v2.3
+// 版本:     v2.4
 //   v1.0  控制台版: http/https 接收摄像头抓拍推送, multipart 内存拆包落盘
 //   v2.0  界面版重构: WinForms 界面配置, 内嵌 https 证书, 单 exe 交付
 //   v2.1  标题改为"报警服务器模拟器", 窗口横向放宽, 按钮文字完整显示
 //   v2.2  按钮高度与保存目录框运行时对齐 (兼容高 DPI 缩放)
 //   v2.3  未知 multipart 部件按真实内容落盘: 图片按魔数, XML/JSON 文本按
 //         内容嗅探, 不再统一 .bin (如 AlarmIn.xml 报警事件, AIOP 轮巡抓图元数据)
+//   v2.4  界面常显提示"摄像头内 URL 必须填写 /test" (现场曾因漏填路径导致 404)
 //
 // 功能:
 //   1. 图形界面配置协议(http/https)/监听IP/端口/保存目录, 点"应用并重启监听"生效
@@ -42,8 +43,8 @@ using System.Windows.Forms;
 [assembly: System.Reflection.AssemblyCompany("yuanbo6")]
 [assembly: System.Reflection.AssemblyProduct("报警服务器模拟器")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright yuanbo6 2026")]
-[assembly: System.Reflection.AssemblyVersion("2.3.0.0")]
-[assembly: System.Reflection.AssemblyFileVersion("2.3.0.0")]
+[assembly: System.Reflection.AssemblyVersion("2.4.0.0")]
+[assembly: System.Reflection.AssemblyFileVersion("2.4.0.0")]
 
 namespace PictureReceiver
 {
@@ -51,7 +52,7 @@ namespace PictureReceiver
 
     static class AppInfo
     {
-        public const string Version = "v2.3";
+        public const string Version = "v2.4";
         public const string Author = "yuanbo6";
         public const string BuildDate = "2026-09-21";
     }
@@ -612,6 +613,7 @@ namespace PictureReceiver
         Button btnApply;
         Label lblStatus;
         Label lblCount;
+        Label lblTestHint;
         Label lblHttpsHint;
         GroupBox grpConfig;
         GroupBox grpLog;
@@ -745,15 +747,22 @@ namespace PictureReceiver
                 btnOpen.Top = txtDir.Top;
             };
 
+            lblTestHint = new Label();
+            lblTestHint.Location = new Point(18, 246);
+            lblTestHint.AutoSize = true;
+            lblTestHint.Font = new Font("Microsoft YaHei UI", 9F, FontStyle.Bold);
+            lblTestHint.ForeColor = Color.FromArgb(180, 60, 0);
+            lblTestHint.Text = "摄像头内 URL 必须填写 /test：http://本机IP:端口/test";
+
             lblHttpsHint = new Label();
-            lblHttpsHint.Location = new Point(18, 248);
+            lblHttpsHint.Location = new Point(18, 268);
             lblHttpsHint.AutoSize = true;
             lblHttpsHint.ForeColor = Color.FromArgb(170, 85, 0);
             lblHttpsHint.Visible = false;
 
             btnApply = new Button();
             btnApply.Text = "应用并重启监听";
-            btnApply.Location = new Point(16, 274);
+            btnApply.Location = new Point(16, 292);
             btnApply.Size = new Size(170, 34);
             btnApply.Font = new Font("Microsoft YaHei UI", 9.5F, FontStyle.Bold);
             btnApply.Click += delegate
@@ -769,8 +778,8 @@ namespace PictureReceiver
 
             grpLog = new GroupBox();
             grpLog.Text = "运行日志";
-            grpLog.Location = new Point(16, 320);
-            grpLog.Size = new Size(628, 164);
+            grpLog.Location = new Point(16, 338);
+            grpLog.Size = new Size(628, 146);
             grpLog.Padding = new Padding(10);
 
             txtLog = new TextBox();
@@ -796,6 +805,7 @@ namespace PictureReceiver
             this.Controls.Add(lblStatus);
             this.Controls.Add(lblCount);
             this.Controls.Add(grpConfig);
+            this.Controls.Add(lblTestHint);
             this.Controls.Add(lblHttpsHint);
             this.Controls.Add(btnApply);
             this.Controls.Add(grpLog);

@@ -11,3 +11,7 @@ recv_*.bin
 
 # 本地解压运行的 release 目录
 PictureReceiver-v*-win/
+
+# release 构建临时文件
+release.json
+*.tmp

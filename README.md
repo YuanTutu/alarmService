@@ -1,7 +1,7 @@
 # PictureReceiver / 报警服务器模拟器 - 摄像头抓拍数据接收器
 
-> 当前版本 **v2.3** · 作者 yuanbo6 · 开发时间 2026-09-21
-> 版本历史：v1.0 控制台版 → v2.0 WinForms 界面版（内嵌 https 证书）→ v2.1 标题与窗口布局调整 → v2.2 按钮高 DPI 等高对齐 → v2.3 未知部件按真实格式落盘
+> 当前版本 **v2.4** · 作者 yuanbo6 · 开发时间 2026-09-21
+> 版本历史：v1.0 控制台版 → v2.0 WinForms 界面版（内嵌 https 证书）→ v2.1 标题与窗口布局调整 → v2.2 按钮高 DPI 等高对齐 → v2.3 未知部件按真实格式落盘 → v2.4 界面常显"/test 必填"提示
 
 ## 一、开发目的
 
@@ -58,7 +58,7 @@ powershell Compress-Archive -Path deliver/PictureReceiver.exe,deliver/README.md 
 
 1. 双击 `deliver/PictureReceiver.exe`，自动按上次保存的配置开始监听
 2. 界面中选协议（http/https）、监听 IP、端口、保存目录，点 **应用并重启监听**
-3. 设备端推送地址：`http://本机IP:端口/test`（https 同理，无需配置证书）
+3. 设备端推送地址：`http://本机IP:端口/test`（https 同理，无需配置证书）——**摄像头内 URL 必须填写 `/test` 路径，漏填会收到 404**（界面配置区下方有常显提示）
 4. 首次运行如弹出防火墙提示，勾选"专用网络/公用网络"并允许访问
 
 ## 六、接收与保存规则
